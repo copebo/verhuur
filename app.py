@@ -1,11 +1,25 @@
 from flask import Flask, request, jsonify
 
+import os
+import psycopg2
+
+DATABASE_URL = os.environ['DATABASE_URL']
+
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
 app = Flask(__name__)
-# app.config["DEBUG"] = True
+app.config["DEBUG"] = True
+
+
+
+
 
 @app.route("/", methods=['GET'])
 def home():
+
     return jsonify(message = "API is online")
+
+
 
 
 bedrijven = [
@@ -16,7 +30,7 @@ bedrijven = [
     },
     {
         'id': 2,
-        'bedrijfsnaam': 'copebp',
+        'bedrijfsnaam': 'copebo',
         'adres' : 'Prins Alexanderlaan 91, 2912AK Nieuwerkerk aan den IJssel'
     },
 
