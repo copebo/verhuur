@@ -1,8 +1,9 @@
-from flask import Flask
+from flask import Flask, jsonify
 
 app = Flask(__name__)
+app.config["DEBUG"] = True
 
-@app.route("/")
+@app.route("/", methods=['GET'])
 def home():
-    return "Hello World"
+    return jsonify("Message","Gelukt")
 
