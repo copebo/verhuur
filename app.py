@@ -26,12 +26,14 @@ bedrijven = [
     {
         'id': 1,
         'bedrijfsnaam': 'De Koningshoeve Verhuur & Catering',
-        'adres' : 'Botweg 1b, 3286LB Klaaswaal'
+        'adres' : 'Botweg 1b, 3286LB Klaaswaal',
+        'telefoonnummer' : '0186-579397'
     },
     {
         'id': 2,
         'bedrijfsnaam': 'copebo',
-        'adres' : 'Prins Alexanderlaan 91, 2912AK Nieuwerkerk aan den IJssel'
+        'adres' : 'Prins Alexanderlaan 91, 2912AK Nieuwerkerk aan den IJssel',
+        'telefoonnummer' : '06-12345678'
     },
 
 ]
