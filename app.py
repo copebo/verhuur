@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.config["DEBUG"] = True
 
 cur = conn.cursor()
-cur.execute("SELECT * FROM bedrijven;")
+cur.execute("SELECT * FROM bedrijf;")
 resultaten = cur.fetchone()
 conn.commit()
 
