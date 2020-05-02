@@ -1,15 +1,22 @@
 from flask import Flask, request, jsonify
 
-# import os
-# import psycopg2
+import os
+import psycopg2
 
-# DATABASE_URL = os.environ['DATABASE_URL']
-
-# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
+cur = conn.cursor()
+cur.execute("SELECT * FROM bedrijven;")
+resultaten = cur.fetchone()
+conn.commit()
+
+# Close communication with the database
+cur.close()
+conn.close()
 
 
 
@@ -17,7 +24,8 @@ app.config["DEBUG"] = True
 @app.route("/", methods=['GET'])
 def home():
 
-    return jsonify(message = "API is online")
+    return jsonify(resultaten)
+    # return jsonify(message = "API is online")
 
 
 
