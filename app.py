@@ -4,31 +4,15 @@ import os
 import psycopg2
 
 DATABASE_URL = os.environ['DATABASE_URL']
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
-cur = conn.cursor()
-cur.execute("SELECT * FROM bedrijf;")
-resultaten = cur.fetchone()
-conn.commit()
-
-# Close communication with the database
-cur.close()
-conn.close()
-
-
-
 
 @app.route("/", methods=['GET'])
 def home():
-
-    return jsonify(resultaten)
-    # return jsonify(message = "API is online")
-
-
-
+    
+    return jsonify(message = "API is online")
 
 bedrijven = [
     {
@@ -48,7 +32,47 @@ bedrijven = [
 
 @app.route("/api/v1/bedrijven/all", methods=['GET'])
 def bedrijf_all():
-    return jsonify(bedrijven)
+
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM bedrijf;")
+    resultaten = cur.fetchall()
+    conn.commit()
+
+    # Close communication with the database
+    cur.close()
+    conn.close()
+
+
+    retval = []
+    for resultaat in resultaten:
+        retval.append(resultaat)
+
+
+    return jsonify(retval)
+
+
+@app.route("/api/v1/bedrijven/", methods=['POST'])
+def bedrijf_toevoegen():
+
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+    # Request data
+    bedrijfsnaam = request.form['bedrijfsnaam']
+    idbedrijf = request.form['idbedrijf']
+
+    # Transform data
+    idbedrijf = int(idbedrijf)
+    bedrijfsnaam = str(bedrijfsnaam)
+    
+    cur = conn.cursor()
+    cur.execute("INSERT INTO bedrijf (idbedrijf,bedrijfsnaam) VALUES(%s,%s);", (idbedrijf, bedrijfsnaam))
+    conn.commit()
+
+     # Close communication with the database
+    cur.close()
+    conn.close()
+    return jsonify(insertID = cur.lastrowid)
 
 
 @app.route("/api/v1/bedrijven/", methods=['GET'])
