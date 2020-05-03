@@ -112,12 +112,13 @@ def bedrijf():
 def bedrijf_toevoegen():
 
     # Request data
-    bedrijfsnaam = request.form['bedrijfsnaam']
-    idbedrijf = request.form['idbedrijf']
+    bedrijf = request.get_json()
+    bedrijfsnaam = str(bedrijf['bedrijfsnaam'])
+    idbedrijf = int(bedrijf['idbedrijf'])
 
-    # Transform data
-    idbedrijf = int(idbedrijf)
-    bedrijfsnaam = str(bedrijfsnaam)
+    # # Transform data
+    # idbedrijf = int(idbedrijf)
+    # bedrijfsnaam = str(bedrijfsnaam)
 
     try:
         # Verbinden
