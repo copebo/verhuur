@@ -11,47 +11,58 @@ app.config["DEBUG"] = True
 
 @app.route("/", methods=['GET'])
 def home():
-    
     return jsonify(message = "API is online")
 
-bedrijven = [
-    {
-        'id': 1,
-        'bedrijfsnaam': 'De Koningshoeve Verhuur & Catering',
-        'adres' : 'Botweg 1b, 3286LB Klaaswaal',
-        'telefoonnummer' : '0186-579397'
-    },
-    {
-        'id': 2,
-        'bedrijfsnaam': 'copebo',
-        'adres' : 'Prins Alexanderlaan 91, 2912AK Nieuwerkerk aan den IJssel',
-        'telefoonnummer' : '06-12345678'
-    },
+# bedrijven = [
+#     {
+#         'id': 1,
+#         'bedrijfsnaam': 'De Koningshoeve Verhuur & Catering',
+#         'adres' : 'Botweg 1b, 3286LB Klaaswaal',
+#         'telefoonnummer' : '0186-579397'
+#     },
+#     {
+#         'id': 2,
+#         'bedrijfsnaam': 'copebo',
+#         'adres' : 'Prins Alexanderlaan 91, 2912AK Nieuwerkerk aan den IJssel',
+#         'telefoonnummer' : '06-12345678'
+#     },
 
-]
+# ]
 
 @app.route("/api/v1/bedrijven/all", methods=['GET'])
 def bedrijf_all():
 
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM bedrijf;")
-    resultaten = cur.fetchall()
-    conn.commit()
+    try:
+        # Verbinden
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cur = conn.cursor()
 
-    # Close communication with the database
-    cur.close()
-    conn.close()
+        # Opbouwen SQL
+        cur.execute("SELECT * FROM bedrijf;")
+        conn.commit()
 
-    bedrijven = []
+        resultaten = cur.fetchall()
 
-    for resultaat in resultaten:
-        bedrijven.append( { 
-            "ID": resultaat[0], 
-            "Bedrijfsnaam": resultaat[1] 
-        } )
+        bedrijven = []
 
-    return jsonify(bedrijven)
+        for resultaat in resultaten:
+            bedrijven.append( { 
+                "ID": resultaat[0], 
+                "Bedrijfsnaam": resultaat[1] 
+            } )
+
+        return jsonify(bedrijven)
+
+    except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+            return jsonify(message = "Overzicht laden niet gelukt")
+
+    finally:
+        # closing database connection
+        if (conn):
+            cur.close()
+            conn.close()
+
 
 @app.route("/api/v1/bedrijven/", methods=['GET'])
 def bedrijf():
@@ -66,21 +77,21 @@ def bedrijf():
 
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM bedrijf WHERE idbedrijf = %s ;", ((id)))
+                conn.commit()
 
                 resultaat = cur.fetchone()
+                bedrijf = []
 
-                conn.commit()
-                # Close communication with the database
-                cur.close()
-                conn.close()
+                bedrijf.append( { 
+                    "ID": resultaat[0], 
+                    "Bedrijfsnaam": resultaat[1] 
+                } )
 
-                print(resultaat)
-                return jsonify(resultaat)
+                return jsonify(bedrijf)
 
             except (Exception, psycopg2.DatabaseError) as error:
                     print(error)
                     return jsonify(message = "Geen bedrijf gevonden met id "+ id)
-                    # return jsonify(error)
 
             finally:
                 # closing database connection
@@ -100,8 +111,6 @@ def bedrijf():
 @app.route("/api/v1/bedrijven/", methods=['POST'])
 def bedrijf_toevoegen():
 
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
     # Request data
     bedrijfsnaam = request.form['bedrijfsnaam']
     idbedrijf = request.form['idbedrijf']
@@ -109,24 +118,37 @@ def bedrijf_toevoegen():
     # Transform data
     idbedrijf = int(idbedrijf)
     bedrijfsnaam = str(bedrijfsnaam)
-    
-    cur = conn.cursor()
-    cur.execute("INSERT INTO bedrijf (idbedrijf,bedrijfsnaam) VALUES(%s,%s);", (idbedrijf, bedrijfsnaam))
-    conn.commit()
 
-     # Close communication with the database
-    cur.close()
-    conn.close()
-    return jsonify(insertID = cur.lastrowid)
+    try:
+        # Verbinden
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        cur = conn.cursor()
+
+        cur.execute("INSERT INTO bedrijf (idbedrijf,bedrijfsnaam) VALUES(%s,%s);", (idbedrijf, bedrijfsnaam))
+        conn.commit()
+
+        return jsonify(insertID = str(cur.lastrowid))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+            return jsonify(message = "Toevoegen niet gelukt")
+
+    finally:
+        # closing database connection
+        cur.close()
+        conn.close()
+
 
 
 @app.route("/api/v1/bedrijven/", methods=['DELETE'])
 def bedrijf_verwijderen():
 
     if 'id' in request.args:
+
         id = request.args['id']
+        # print(id)
+        
         if id:
-            id = str(id)
 
             try:
                 # Verbinden
@@ -134,13 +156,11 @@ def bedrijf_verwijderen():
                 cur = conn.cursor()
 
                 # Opbouwen SQL
-                cur.execute("SELECT * FROM bedrijf WHERE idbedrijf = %s ;", ((id)))
-                aantalBedrijven = cur.fetchone()
-
-                if aantalBedrijven :
-                    cur = conn.cursor()
-                    cur.execute("DELETE FROM bedrijf WHERE idbedrijf = %s ;", ((id)))
-                    conn.commit()
+                cur.execute("DELETE FROM bedrijf WHERE idbedrijf = %s ;", (id,))
+                
+                conn.commit()
+                
+                if cur.rowcount == 1:
                     return jsonify(message = "Bedrijf met id "+ str(id) +" verwijderd")
                 else :
                     return jsonify(message = "Geen bedrijf met id "+ str(id) +" gevonden")
@@ -148,15 +168,14 @@ def bedrijf_verwijderen():
 
             except (Exception, psycopg2.DatabaseError) as error:
                     print(error)
-                    return jsonify(message = "Geen bedrijf gevonden met id "+ id)
-                    # return jsonify(error)
+                    return jsonify(message = "Verwijderen niet gelukt")
 
             finally:
                 # closing database connection
                 if (conn):
                     cur.close()
                     conn.close()
-                    print("PostgreSQL connection is closed \n")
+                    # print("PostgreSQL connection is closed \n")
 
         else:
             return jsonify(message = "Geen id meegegeven")
