@@ -43,13 +43,15 @@ def bedrijf_all():
     cur.close()
     conn.close()
 
+    bedrijven = []
 
-    retval = []
     for resultaat in resultaten:
-        retval.append(resultaat)
+        bedrijven.append( { 
+            "ID": resultaat[0], 
+            "Bedrijfsnaam": resultaat[1] 
+        } )
 
-
-    return jsonify(retval)
+    return jsonify(bedrijven)
 
 
 @app.route("/api/v1/bedrijven/", methods=['POST'])
@@ -77,16 +79,42 @@ def bedrijf_toevoegen():
 
 @app.route("/api/v1/bedrijven/", methods=['GET'])
 def bedrijf():
+    
     if 'id' in request.args:
-        id = int(request.args['id'])
-    else :
-        return jsonify(message = "Geen bedrijf gevonden met het id " + str(request.args['id']) )
+        id = request.args['id']
+        if id:
+            id = str(id)
 
-    results = []
+            try:
+                conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
-    for bedrijf in bedrijven:
-        if bedrijf['id'] == id:
-            results.append(bedrijf)
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM bedrijf WHERE idbedrijf = %s ;", ((id)))
 
-    return jsonify(results)
+                resultaat = cur.fetchone()
 
+                conn.commit()
+                # Close communication with the database
+                cur.close()
+                conn.close()
+
+                print(resultaat)
+                return jsonify(resultaat)
+
+            except (Exception, psycopg2.DatabaseError) as error:
+                    print(error)
+                    return jsonify(message = "Geen bedrijf gevonden met id "+ id)
+                    # return jsonify(error)
+
+            finally:
+                # closing database connection
+                if (conn):
+                    cur.close()
+                    conn.close()
+                    print("PostgreSQL connection is closed \n")
+
+        else:
+            return jsonify(message = "Geen id meegegeven")
+
+    else:
+        return jsonify(message = "Geen id meegegeven")
