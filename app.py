@@ -76,7 +76,7 @@ def bedrijf():
                 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
                 cur = conn.cursor()
-                cur.execute("SELECT * FROM bedrijf WHERE idbedrijf = %s ;", ((id)))
+                cur.execute("SELECT * FROM bedrijf WHERE idbedrijf = %s ;", (id,))
                 conn.commit()
 
                 resultaat = cur.fetchone()
@@ -113,12 +113,13 @@ def bedrijf_toevoegen():
 
     # Request data
     bedrijf = request.get_json()
-    bedrijfsnaam = str(bedrijf['bedrijfsnaam'])
-    idbedrijf = int(bedrijf['idbedrijf'])
 
-    # # Transform data
-    # idbedrijf = int(idbedrijf)
-    # bedrijfsnaam = str(bedrijfsnaam)
+    bedrijfsnaam = bedrijf['bedrijfsnaam']
+    idbedrijf = bedrijf['idbedrijf']
+
+    #Transform data
+    idbedrijf = int(idbedrijf)
+    bedrijfsnaam = str(bedrijfsnaam)
 
     try:
         # Verbinden
