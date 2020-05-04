@@ -13,22 +13,6 @@ app.config["DEBUG"] = True
 def home():
     return jsonify(message = "API is online")
 
-# bedrijven = [
-#     {
-#         'id': 1,
-#         'bedrijfsnaam': 'De Koningshoeve Verhuur & Catering',
-#         'adres' : 'Botweg 1b, 3286LB Klaaswaal',
-#         'telefoonnummer' : '0186-579397'
-#     },
-#     {
-#         'id': 2,
-#         'bedrijfsnaam': 'copebo',
-#         'adres' : 'Prins Alexanderlaan 91, 2912AK Nieuwerkerk aan den IJssel',
-#         'telefoonnummer' : '06-12345678'
-#     },
-
-# ]
-
 @app.route("/api/v1/bedrijven/all", methods=['GET'])
 def bedrijf_all():
 
