@@ -39,7 +39,7 @@ def bedrijf_all():
 
     except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-            return jsonify(message = "Overzicht laden niet gelukt")
+            return jsonify(message = "Overzicht laden niet gelukt"), 404
 
     finally:
         # closing database connection
@@ -75,7 +75,7 @@ def bedrijf():
 
             except (Exception, psycopg2.DatabaseError) as error:
                     print(error)
-                    return jsonify(message = "Geen bedrijf gevonden met id "+ id)
+                    return jsonify(message = "Geen bedrijf gevonden met id "+ id), 404
 
             finally:
                 # closing database connection
@@ -85,10 +85,10 @@ def bedrijf():
                     print("PostgreSQL connection is closed \n")
 
         else:
-            return jsonify(message = "Geen id meegegeven")
+            return jsonify(message = "Geen id meegegeven"), 404
 
     else:
-        return jsonify(message = "Geen id meegegeven")
+        return jsonify(message = "Geen id meegegeven"), 404
 
 
 
@@ -117,7 +117,7 @@ def bedrijf_toevoegen():
 
     except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-            return jsonify(message = "Toevoegen niet gelukt")
+            return jsonify(message = "Toevoegen niet gelukt"), 404
 
     finally:
         # closing database connection
@@ -154,7 +154,7 @@ def bedrijf_verwijderen():
 
             except (Exception, psycopg2.DatabaseError) as error:
                     print(error)
-                    return jsonify(message = "Verwijderen niet gelukt")
+                    return jsonify(message = "Verwijderen niet gelukt"), 404
 
             finally:
                 # closing database connection
@@ -164,7 +164,7 @@ def bedrijf_verwijderen():
                     # print("PostgreSQL connection is closed \n")
 
         else:
-            return jsonify(message = "Geen id meegegeven")
+            return jsonify(message = "Geen id meegegeven"), 404
 
     else:
-        return jsonify(message = "Geen id meegegeven")
+        return jsonify(message = "Geen id meegegeven"), 404
